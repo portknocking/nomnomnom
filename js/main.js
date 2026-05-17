@@ -899,6 +899,82 @@ function setupCheckoutForm() {
 
 }
 
+/* =========================
+   BUSINESS STATUS
+========================= */
+
+function setupBusinessStatus() {
+
+  const statusElement =
+    document.querySelector(
+      ".open-status"
+    );
+
+  if (!statusElement) return;
+
+  const now = new Date();
+
+  const currentHour =
+    now.getHours();
+
+  const currentDay =
+    now.getDay();
+
+  /*
+    DAYS:
+    0 = Sunday
+    6 = Saturday
+  */
+
+  const isWeekend =
+    currentDay === 0;
+
+  const openingHour = 10;
+  const closingHour = 21;
+
+  /* =========================
+     WEEKEND CLOSED
+  ========================= */
+
+  if (isWeekend) {
+
+    statusElement.textContent =
+      "Closed Today";
+
+    statusElement.style.color =
+      "#b44f4f";
+
+    return;
+
+  }
+
+  /* =========================
+     OPEN HOURS
+  ========================= */
+
+  if (
+    currentHour >= openingHour &&
+    currentHour < closingHour
+  ) {
+
+    statusElement.textContent =
+      "Open Now";
+
+    statusElement.style.color =
+      "#2f7a3f";
+
+  } else {
+
+    statusElement.textContent =
+      "Pre-orders Available";
+
+    statusElement.style.color =
+      "#c28b2c";
+
+  }
+
+}
+
 
 /* =========================
    INIT
@@ -907,6 +983,7 @@ function setupCheckoutForm() {
 document.addEventListener(
   "DOMContentLoaded",
   () => {
+    setupBusinessStatus();
 
     renderMenu();
 
