@@ -900,7 +900,7 @@ function setupCheckoutForm() {
 }
 
 /* =========================
-   BUSINESS STATUS
+   BUSINESS SATUS
 ========================= */
 
 function setupBusinessStatus() {
