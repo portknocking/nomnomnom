@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Cart | Veloura Bakery</title>
+
+  <meta
+    name="description"
+    content="Review your cart and place your handcrafted dessert order from Veloura Bakery."
+  />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+
+    <div class="container nav-wrapper">
+
+      <a href="index.html" class="logo">
+        Veloura
+      </a>
+
+      <nav class="nav-links">
+        <a href="menu.html">Menu</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+
+        <a href="cart.html" class="cart-btn">
+          Cart
+        </a>
+      </nav>
+
+    </div>
+
+  </header>
+
+  <!-- HERO -->
+  <section class="page-hero">
+
+    <div class="container">
+
+      <p class="eyebrow dark-eyebrow">
+        YOUR ORDER
+      </p>
+
+      <h1 class="page-title">
+        Review Your Cart <br />
+        Before Checkout
+      </h1>
+
+      <p class="page-description">
+        Fresh desserts prepared daily and carefully packed for delivery.
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- CART SECTION -->
+  <section class="cart-section">
+
+    <div class="container cart-grid">
+
+      <!-- LEFT SIDE -->
+
+      <div class="cart-items-wrapper"></div>
+
+      <!-- RIGHT SIDE -->
+
+      <aside class="checkout-card">
+
+        <h2>
+          Checkout
+        </h2>
+
+        <!-- PINCODE -->
+
+        <div class="checkout-block">
+
+          <label>
+            Delivery Pincode
+          </label>
+
+          <div class="pincode-row">
+
+            <input
+              type="text"
+              class="pincode-input"
+              placeholder="Enter pincode"
+              />
+
+              <button
+                type="button"
+                class="check-pincode-btn">
+                Check
+              </button>
+
+          </div>
+
+          <p class="delivery-success">
+            Delivery available in your area
+          </p>
+
+        </div>
+
+        <!-- FORM -->
+
+        <form class="checkout-form">
+
+          <div class="form-group">
+
+            <label>
+              Full Name
+            </label>
+
+            <input
+              type="text"
+              placeholder="Your name"
+              required
+            />
+
+          </div>
+
+          <div class="form-group">
+
+            <label>
+              Phone Number
+            </label>
+
+            <input
+              type="tel"
+              placeholder="+91 98765 43210"
+              required
+            />
+
+          </div>
+
+          <div class="form-group">
+
+            <label>
+              Delivery Address
+            </label>
+
+            <textarea
+              rows="4"
+              placeholder="House number, street, landmark..."
+              required
+            ></textarea>
+
+          </div>
+
+          <div class="form-group">
+
+            <label>
+              Special Instructions
+            </label>
+
+            <textarea
+              rows="3"
+              placeholder="Candles, writing on cake, delivery notes..."
+            ></textarea>
+
+          </div>
+
+          <!-- TOTALS -->
+
+          <div class="order-summary">
+
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span class="summary-subtotal">₹0</span>
+            </div>
+
+            <div class="summary-row">
+              <span>Delivery</span>
+              <span class="summary-delivery">
+                ₹0
+              </span>
+            </div>
+
+            <div class="summary-row total-row">
+              <span>Total</span>
+              <span class="summary-total">₹0</span>
+            </div>
+
+          </div>
+
+          <button type="submit" class="place-order-btn">
+            Place Order
+          </button>
+
+        </form>
+
+      </aside>
+
+    </div>
+
+  </section>
+
+  <!-- EMPTY CART -->
+  <section class="empty-cart hidden">
+
+    <div class="container empty-cart-box">
+
+      <h2>
+        Your Cart Is Empty
+      </h2>
+
+      <p>
+        Explore our handcrafted desserts and add something indulgent.
+      </p>
+
+      <a href="menu.html" class="primary-btn">
+        Browse Menu
+      </a>
+
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+
+    <div class="container footer-content">
+
+      <div>
+
+        <h3>
+          Veloura Bakery
+        </h3>
+
+        <p>
+          Premium handcrafted desserts made fresh daily.
+        </p>
+
+      </div>
+
+      <div class="footer-links">
+        <a href="menu.html">Menu</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
+
+    </div>
+
+  </footer>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
