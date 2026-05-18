@@ -1,48 +1,52 @@
 export async function onRequestPost(context) {
 
-    const ip =
-  context.request.headers.get(
-    "CF-Connecting-IP"
-  ) || "unknown";
+  const ip =
+    context.request.headers.get(
+      "CF-Connecting-IP"
+    ) || "unknown";
 
-const rateLimitKey =
-  `orders:${ip}`;
+  const rateLimitKey =
+    `orders:${ip}`;
 
-const kv =
-  context.env.ORDER_RATE_LIMIT;
+  const kv =
+    context.env.ORDER_RATE_LIMIT;
 
-if (!kv) {
+  if (!kv) {
 
-  return Response.json(
-    {
-      success: false,
-      message:
-        "Rate limiter unavailable"
-    },
-    {
-      status: 500
-    }
-  );
+    console.error(
+      "KV binding missing"
+    );
 
-}
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Server configuration error"
+      },
+      {
+        status: 500
+      }
+    );
 
+  }
 
   try {
 
-    const body =
-      await context.request.json();
+    /* =========================
+       CONTENT TYPE
+    ========================= */
 
     const contentType =
       context.request.headers.get(
         "content-type"
       ) || "";
-    
+
     if (
       !contentType.includes(
         "application/json"
       )
     ) {
-    
+
       return Response.json(
         {
           success: false,
@@ -53,21 +57,23 @@ if (!kv) {
           status: 400
         }
       );
-    
+
     }
 
-    const {
-    customer,
-    items = []
-    } = body;
-
     /* =========================
-       BASIC VALIDATION
+       REQUEST BODY
     ========================= */
+
+    const body =
+      await context.request.json();
+
+    const {
+      customer,
+      items = []
+    } = body;
 
     if (
       !customer ||
-      !items ||
       !Array.isArray(items) ||
       items.length === 0
     ) {
@@ -126,23 +132,8 @@ if (!kv) {
         customer.instructions || ""
       ).trim();
 
-    if (instructions.length > 500) {
-
-    return Response.json(
-      {
-        success: false,
-        message:
-          "Instructions too long"
-      },
-      {
-        status: 400
-      }
-    );
-
-    }
-
     /* =========================
-       NAME VALIDATION
+       INPUT VALIDATION
     ========================= */
 
     if (name.length < 2) {
@@ -159,10 +150,6 @@ if (!kv) {
       );
 
     }
-
-    /* =========================
-       PHONE VALIDATION
-    ========================= */
 
     const phoneRegex =
       /^(?:\+91|91)?[6-9]\d{9}$/;
@@ -184,11 +171,10 @@ if (!kv) {
 
     }
 
-    /* =========================
-       ADDRESS VALIDATION
-    ========================= */
-
-    if (address.length < 10) {
+    if (
+      address.length < 10 ||
+      address.length > 300
+    ) {
 
       return Response.json(
         {
@@ -203,13 +189,15 @@ if (!kv) {
 
     }
 
-    if (address.length > 300) {
+    if (
+      instructions.length > 500
+    ) {
 
       return Response.json(
         {
           success: false,
           message:
-            "Address too long"
+            "Instructions too long"
         },
         {
           status: 400
@@ -217,10 +205,6 @@ if (!kv) {
       );
 
     }
-
-    /* =========================
-       PINCODE VALIDATION
-    ========================= */
 
     const allowedPincodes = [
       "440001",
@@ -248,345 +232,307 @@ if (!kv) {
 
     }
 
-/* =========================
-   LOAD TRUSTED MENU
-========================= */
+    /* =========================
+       LOAD TRUSTED MENU
+    ========================= */
 
-const menuResponse =
-  await fetch(
-    new URL(
-      "../../data/menu.json",
-      import.meta.url
-    )
-  );
+    const menuURL =
+      new URL(
+        "/data/menu.json",
+        context.request.url
+      );
 
-if (!menuResponse.ok) {
+    const menuResponse =
+      await fetch(menuURL);
 
-  return Response.json(
-    {
-      success: false,
-      message:
-        "Failed to load menu"
-    },
-    {
-      status: 500
+    if (!menuResponse.ok) {
+
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Failed to load menu"
+        },
+        {
+          status: 500
+        }
+      );
+
     }
-  );
 
-}
+    const MENU =
+      await menuResponse.json();
 
-const MENU =
-  await menuResponse.json();
+    /* =========================
+       VALIDATE ITEMS
+    ========================= */
 
-/* =========================
-   RECALCULATE TOTAL
-========================= */
+    let subtotal = 0;
 
-let subtotal = 0;
+    const validatedItems = [];
 
-const validatedItems = [];
+    for (const item of items) {
 
-for (const item of items) {
+      if (
+        !item ||
+        typeof item !== "object"
+      ) {
 
-  if (
-    !item ||
-    typeof item !== "object"
-  ) {
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Malformed cart item"
+          },
+          {
+            status: 400
+          }
+        );
 
-    return Response.json(
-      {
-        success: false,
-        message:
-          "Malformed cart item"
-      },
-      {
-        status: 400
       }
-    );
 
-  }
+      const quantity =
+        Number(item.quantity);
 
-  const quantity =
-    Number(item.quantity);
+      if (
+        Number.isNaN(quantity) ||
+        quantity <= 0 ||
+        quantity > 20
+      ) {
 
-  if (
-    Number.isNaN(quantity) ||
-    quantity <= 0 ||
-    quantity > 20
-  ) {
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Invalid quantity"
+          },
+          {
+            status: 400
+          }
+        );
 
-    return Response.json(
-      {
-        success: false,
-        message:
-          "Invalid quantity"
-      },
-      {
-        status: 400
       }
-    );
 
-  }
+      const realProduct =
+        MENU.find(
+          product =>
+            product.id === item.id
+        );
 
-  /* =========================
-     FIND REAL PRODUCT
-  ========================= */
+      if (!realProduct) {
 
-  const realProduct =
-    MENU.find(
-      product =>
-        product.id === item.id
-    );
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Invalid product"
+          },
+          {
+            status: 400
+          }
+        );
 
-  if (!realProduct) {
-
-    return Response.json(
-      {
-        success: false,
-        message:
-          "Invalid product"
-      },
-      {
-        status: 400
       }
-    );
 
-  }
+      if (!realProduct.available) {
 
-  /* =========================
-     PRODUCT AVAILABILITY
-  ========================= */
+        return Response.json(
+          {
+            success: false,
+            message:
+              `${realProduct.name} unavailable`
+          },
+          {
+            status: 400
+          }
+        );
 
-  if (!realProduct.available) {
-
-    return Response.json(
-      {
-        success: false,
-        message:
-          `${realProduct.name} is unavailable`
-      },
-      {
-        status: 400
       }
-    );
 
-  }
+      const itemTotal =
+        realProduct.price *
+        quantity;
 
-  /* =========================
-     USE TRUSTED PRICE
-  ========================= */
+      subtotal += itemTotal;
 
-  const itemTotal =
-    realProduct.price *
-    quantity;
+      validatedItems.push({
+        id:
+          realProduct.id,
 
-  subtotal += itemTotal;
+        name:
+          realProduct.name,
 
-  validatedItems.push({
-    id:
-      realProduct.id,
+        price:
+          realProduct.price,
 
-    name:
-      realProduct.name,
+        quantity
+      });
 
-    price:
-      realProduct.price,
-
-    quantity
-  });
-
-}
-
-/* =========================
-   BUSINESS HOURS
-========================= */
-
-const indiaNow =
-  new Date(
-    new Date().toLocaleString(
-      "en-US",
-      {
-        timeZone:
-          "Asia/Kolkata"
-      }
-    )
-  );
-
-const currentHour =
-  indiaNow.getHours();
-
-const currentDay =
-  indiaNow.getDay();
-
-const indiaTimeString =
-  indiaNow.toLocaleString(
-    "en-IN",
-    {
-      timeZone:
-        "Asia/Kolkata"
     }
-  );
 
-/*
-  0 = Sunday
-*/
+    const deliveryFee = 120;
 
-const isWeekend =
-  currentDay === 0;
+    const total =
+      subtotal + deliveryFee;
 
-const openingHour = 10;
-const closingHour = 21;
+    /* =========================
+       BUSINESS HOURS
+    ========================= */
 
-let businessStatus =
-  "OPEN";
+    const indiaNow =
+      new Date(
+        new Date().toLocaleString(
+          "en-US",
+          {
+            timeZone:
+              "Asia/Kolkata"
+          }
+        )
+      );
 
-/* =========================
-   CLOSED DAY
-========================= */
+    const currentHour =
+      indiaNow.getHours();
 
-if (isWeekend) {
+    const currentDay =
+      indiaNow.getDay();
 
-  return Response.json(
-    {
-      success: false,
-      message:
-        "Bakery is closed today"
-    },
-    {
-      status: 403
+    const indiaTimeString =
+      indiaNow.toLocaleString(
+        "en-IN",
+        {
+          timeZone:
+            "Asia/Kolkata"
+        }
+      );
+
+    const isWeekend =
+      currentDay === 0;
+
+    const openingHour = 10;
+    const closingHour = 21;
+
+    let businessStatus =
+      "OPEN";
+
+    if (isWeekend) {
+
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Bakery closed today"
+        },
+        {
+          status: 403
+        }
+      );
+
     }
-  );
 
-}
+    if (
+      currentHour < openingHour ||
+      currentHour >= closingHour
+    ) {
 
-/* =========================
-   PRE-ORDER HOURS
-========================= */
+      businessStatus =
+        "PREORDER";
 
-if (
-  currentHour < openingHour ||
-  currentHour >= closingHour
-) {
+    }
 
-  businessStatus =
-    "PREORDER";
+    /* =========================
+       RATE LIMITING
+    ========================= */
 
-}
+    const now =
+      Date.now();
 
-/* =========================
-   RATE LIMITING
-========================= */
+    const existingData =
+      await kv.get(rateLimitKey);
 
-const now =
-  Date.now();
+    let orderTimestamps = [];
 
-const existingData =
-  await kv.get(rateLimitKey);
+    if (existingData) {
 
-let orderTimestamps = [];
+      try {
 
-if (existingData) {
+        orderTimestamps =
+          JSON.parse(existingData);
 
-  try {
+      } catch {
+
+        orderTimestamps = [];
+
+      }
+
+    }
 
     orderTimestamps =
-      JSON.parse(existingData);
+      orderTimestamps.filter(
+        timestamp =>
+          now - timestamp <
+          60 * 60 * 1000
+      );
 
-  } catch {
+    const recentOrder =
+      orderTimestamps.find(
+        timestamp =>
+          now - timestamp <
+          2 * 60 * 1000
+      );
 
-    orderTimestamps = [];
+    if (recentOrder) {
 
-  }
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Please wait 2 minutes before ordering again"
+        },
+        {
+          status: 429
+        }
+      );
 
-}
-
-/* =========================
-   CLEAN OLD ENTRIES
-========================= */
-
-/*
-  Keep only last 1 hour
-*/
-
-orderTimestamps =
-  orderTimestamps.filter(
-    timestamp =>
-      now - timestamp <
-      60 * 60 * 1000
-  );
-
-/* =========================
-   1 ORDER / 2 MINUTES
-========================= */
-
-const recentOrder =
-  orderTimestamps.find(
-    timestamp =>
-      now - timestamp <
-      2 * 60 * 1000
-  );
-
-if (recentOrder) {
-
-  return Response.json(
-    {
-      success: false,
-      message:
-        "Please wait 2 minutes before placing another order"
-    },
-    {
-      status: 429
     }
-  );
 
-}
+    if (
+      orderTimestamps.length >= 5
+    ) {
 
-/* =========================
-   MAX 5 ORDERS / HOUR
-========================= */
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Hourly order limit reached"
+        },
+        {
+          status: 429
+        }
+      );
 
-if (
-  orderTimestamps.length >= 5
-) {
-
-  return Response.json(
-    {
-      success: false,
-      message:
-        "Hourly order limit reached"
-    },
-    {
-      status: 429
     }
-  );
 
-}
+    orderTimestamps.push(now);
 
-/* =========================
-   SAVE NEW TIMESTAMP
-========================= */
-
-orderTimestamps.push(now);
-
-await kv.put(
-  rateLimitKey,
-  JSON.stringify(orderTimestamps),
-  {
-    expirationTtl:
-      60 * 60
-  }
-);
+    await kv.put(
+      rateLimitKey,
+      JSON.stringify(orderTimestamps),
+      {
+        expirationTtl:
+          60 * 60
+      }
+    );
 
     /* =========================
        TELEGRAM MESSAGE
     ========================= */
 
-const orderLabel =
-  businessStatus === "PREORDER"
-    ? "📦 PRE-ORDER"
-    : "🍰 NEW ORDER";
+    const orderLabel =
+      businessStatus === "PREORDER"
+        ? "📦 PRE-ORDER"
+        : "🍰 NEW ORDER";
 
-let telegramMessage =
+    let telegramMessage =
 `${orderLabel}
 
 👤 Customer:
@@ -607,7 +553,6 @@ ${indiaTimeString}
 ━━━━━━━━━━
 ORDER ITEMS`;
 
-
     validatedItems.forEach(item => {
 
       telegramMessage += `
@@ -623,11 +568,6 @@ Amount: ₹${item.price * item.quantity}`;
 ━━━━━━━━━━
 
 Subtotal: ₹${subtotal}
-
-const deliveryFee = 120;
-
-const total =
-  subtotal + deliveryFee;
 
 Delivery: ₹${deliveryFee}
 
@@ -645,7 +585,7 @@ ${instructions}`;
     }
 
     /* =========================
-       ENV VARIABLES
+       TELEGRAM CONFIG
     ========================= */
 
     const telegramToken =
@@ -675,47 +615,33 @@ ${instructions}`;
     }
 
     const chatIds =
-      chatIdsRaw
-        .split(",");
-
-    /* =========================
-       TELEGRAM API
-    ========================= */
+      chatIdsRaw.split(",");
 
     const telegramURL =
 `https://api.telegram.org/bot${telegramToken}/sendMessage`;
 
     for (const chatId of chatIds) {
 
-      const response =
-        await fetch(
-          telegramURL,
-          {
-            method: "POST",
+      await fetch(
+        telegramURL,
+        {
+          method: "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-            body: JSON.stringify({
-              chat_id:
-                chatId.trim(),
+          body: JSON.stringify({
+            chat_id:
+              chatId.trim(),
 
-              text:
-                telegramMessage
-            })
+            text:
+              telegramMessage
+          })
 
-          }
-        );
-
-      if (!response.ok) {
-
-        console.error(
-          "Telegram send failed"
-        );
-
-      }
+        }
+      );
 
     }
 
@@ -731,7 +657,10 @@ ${instructions}`;
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "ORDER API ERROR:",
+      error
+    );
 
     return Response.json(
       {
