@@ -11,6 +11,22 @@ const rateLimitKey =
 const kv =
   context.env.ORDER_RATE_LIMIT;
 
+if (!kv) {
+
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Rate limiter unavailable"
+    },
+    {
+      status: 500
+    }
+  );
+
+}
+
+
   try {
 
     const body =
@@ -41,8 +57,8 @@ const kv =
     }
 
     const {
-      customer,
-      items
+    customer,
+    items = []
     } = body;
 
     /* =========================
@@ -81,7 +97,7 @@ const kv =
           status: 400
         }
       );
-  
+
     }
 
     /* =========================
@@ -187,6 +203,21 @@ const kv =
 
     }
 
+    if (address.length > 300) {
+
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Address too long"
+        },
+        {
+          status: 400
+        }
+      );
+
+    }
+
     /* =========================
        PINCODE VALIDATION
     ========================= */
@@ -217,105 +248,184 @@ const kv =
 
     }
 
-    /* =========================
-       RECALCULATE TOTAL
-    ========================= */
+/* =========================
+   LOAD TRUSTED MENU
+========================= */
 
-    let subtotal = 0;
+const menuResponse =
+  await fetch(
+    new URL(
+      "../../data/menu.json",
+      import.meta.url
+    )
+  );
 
-    for (const item of items) {
+if (!menuResponse.ok) {
 
-      if (
-        !item ||
-        typeof item !== "object"
-      ) {
-
-        return Response.json(
-          {
-            success: false,
-            message:
-              "Malformed cart item"
-          },
-          {
-            status: 400
-          }
-        );
-
-      }
-
-      const quantity =
-        Number(item.quantity);
-
-      const price =
-        Number(item.price);
-
-      if (
-        !item.name ||
-        Number.isNaN(quantity) ||
-        Number.isNaN(price) ||
-        quantity <= 0 ||
-        price <= 0
-      ) {
-
-        return Response.json(
-          {
-            success: false,
-            message:
-              "Invalid cart data"
-          },
-          {
-            status: 400
-          }
-        );
-
-      }
-
-      subtotal +=
-        price * quantity;
-
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Failed to load menu"
+    },
+    {
+      status: 500
     }
+  );
 
-    const deliveryFee = 120;
+}
 
-    const total =
-      subtotal + deliveryFee;
+const MENU =
+  await menuResponse.json();
 
-    if (subtotal <= 0) {
+/* =========================
+   RECALCULATE TOTAL
+========================= */
+
+let subtotal = 0;
+
+const validatedItems = [];
+
+for (const item of items) {
+
+  if (
+    !item ||
+    typeof item !== "object"
+  ) {
 
     return Response.json(
       {
         success: false,
         message:
-          "Invalid order amount"
+          "Malformed cart item"
       },
       {
         status: 400
       }
     );
 
-}
+  }
 
+  const quantity =
+    Number(item.quantity);
+
+  if (
+    Number.isNaN(quantity) ||
+    quantity <= 0 ||
+    quantity > 20
+  ) {
+
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Invalid quantity"
+      },
+      {
+        status: 400
+      }
+    );
+
+  }
+
+  /* =========================
+     FIND REAL PRODUCT
+  ========================= */
+
+  const realProduct =
+    MENU.find(
+      product =>
+        product.id === item.id
+    );
+
+  if (!realProduct) {
+
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Invalid product"
+      },
+      {
+        status: 400
+      }
+    );
+
+  }
+
+  /* =========================
+     PRODUCT AVAILABILITY
+  ========================= */
+
+  if (!realProduct.available) {
+
+    return Response.json(
+      {
+        success: false,
+        message:
+          `${realProduct.name} is unavailable`
+      },
+      {
+        status: 400
+      }
+    );
+
+  }
+
+  /* =========================
+     USE TRUSTED PRICE
+  ========================= */
+
+  const itemTotal =
+    realProduct.price *
+    quantity;
+
+  subtotal += itemTotal;
+
+  validatedItems.push({
+    id:
+      realProduct.id,
+
+    name:
+      realProduct.name,
+
+    price:
+      realProduct.price,
+
+    quantity
+  });
+
+}
 
 /* =========================
    BUSINESS HOURS
 ========================= */
 
-const indiaTime =
-  new Date().toLocaleString(
-    "en-US",
-    {
-      timeZone: "Asia/Kolkata"
-    }
+const indiaNow =
+  new Date(
+    new Date().toLocaleString(
+      "en-US",
+      {
+        timeZone:
+          "Asia/Kolkata"
+      }
+    )
   );
 
-const now =
-  new Date(indiaTime);
-
 const currentHour =
-  now.getHours();
+  indiaNow.getHours();
 
 const currentDay =
-  now.getDay();
+  indiaNow.getDay();
+
+const indiaTimeString =
+  indiaNow.toLocaleString(
+    "en-IN",
+    {
+      timeZone:
+        "Asia/Kolkata"
+    }
+  );
 
 /*
   0 = Sunday
@@ -491,11 +601,14 @@ ${address}
 📮 Pincode:
 ${pincode}
 
+🕒 Time:
+${indiaTimeString}
+
 ━━━━━━━━━━
 ORDER ITEMS`;
 
 
-    items.forEach(item => {
+    validatedItems.forEach(item => {
 
       telegramMessage += `
 
@@ -510,6 +623,11 @@ Amount: ₹${item.price * item.quantity}`;
 ━━━━━━━━━━
 
 Subtotal: ₹${subtotal}
+
+const deliveryFee = 120;
+
+const total =
+  subtotal + deliveryFee;
 
 Delivery: ₹${deliveryFee}
 
