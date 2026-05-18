@@ -1,9 +1,44 @@
 export async function onRequestPost(context) {
 
+    const ip =
+  context.request.headers.get(
+    "CF-Connecting-IP"
+  ) || "unknown";
+
+const rateLimitKey =
+  `orders:${ip}`;
+
+const kv =
+  context.env.ORDER_RATE_LIMIT;
+
   try {
 
     const body =
       await context.request.json();
+
+    const contentType =
+      context.request.headers.get(
+        "content-type"
+      ) || "";
+    
+    if (
+      !contentType.includes(
+        "application/json"
+      )
+    ) {
+    
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Invalid content type"
+        },
+        {
+          status: 400
+        }
+      );
+    
+    }
 
     const {
       customer,
@@ -32,6 +67,21 @@ export async function onRequestPost(context) {
         }
       );
 
+    }
+
+    if (items.length > 25) {
+
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Too many items"
+        },
+        {
+          status: 400
+        }
+      );
+  
     }
 
     /* =========================
@@ -230,13 +280,36 @@ export async function onRequestPost(context) {
     const total =
       subtotal + deliveryFee;
 
+    if (subtotal <= 0) {
+
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Invalid order amount"
+      },
+      {
+        status: 400
+      }
+    );
+
+}
+
 
 /* =========================
    BUSINESS HOURS
 ========================= */
 
+const indiaTime =
+  new Date().toLocaleString(
+    "en-US",
+    {
+      timeZone: "Asia/Kolkata"
+    }
+  );
+
 const now =
-  new Date();
+  new Date(indiaTime);
 
 const currentHour =
   now.getHours();
@@ -289,6 +362,110 @@ if (
     "PREORDER";
 
 }
+
+/* =========================
+   RATE LIMITING
+========================= */
+
+const now =
+  Date.now();
+
+const existingData =
+  await kv.get(rateLimitKey);
+
+let orderTimestamps = [];
+
+if (existingData) {
+
+  try {
+
+    orderTimestamps =
+      JSON.parse(existingData);
+
+  } catch {
+
+    orderTimestamps = [];
+
+  }
+
+}
+
+/* =========================
+   CLEAN OLD ENTRIES
+========================= */
+
+/*
+  Keep only last 1 hour
+*/
+
+orderTimestamps =
+  orderTimestamps.filter(
+    timestamp =>
+      now - timestamp <
+      60 * 60 * 1000
+  );
+
+/* =========================
+   1 ORDER / 2 MINUTES
+========================= */
+
+const recentOrder =
+  orderTimestamps.find(
+    timestamp =>
+      now - timestamp <
+      2 * 60 * 1000
+  );
+
+if (recentOrder) {
+
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Please wait 2 minutes before placing another order"
+    },
+    {
+      status: 429
+    }
+  );
+
+}
+
+/* =========================
+   MAX 5 ORDERS / HOUR
+========================= */
+
+if (
+  orderTimestamps.length >= 5
+) {
+
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Hourly order limit reached"
+    },
+    {
+      status: 429
+    }
+  );
+
+}
+
+/* =========================
+   SAVE NEW TIMESTAMP
+========================= */
+
+orderTimestamps.push(now);
+
+await kv.put(
+  rateLimitKey,
+  JSON.stringify(orderTimestamps),
+  {
+    expirationTtl:
+      60 * 60
+  }
+);
 
     /* =========================
        TELEGRAM MESSAGE
