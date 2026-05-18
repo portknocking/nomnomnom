@@ -17,7 +17,8 @@ export async function onRequestPost(context) {
     if (
       !customer ||
       !items ||
-      !Array.isArray(items)
+      !Array.isArray(items) ||
+      items.length === 0
     ) {
 
       return Response.json(
@@ -34,13 +35,51 @@ export async function onRequestPost(context) {
     }
 
     /* =========================
-       NAME
+       CLEAN INPUTS
     ========================= */
 
-    if (
-      !customer.name ||
-      customer.name.length < 2
-    ) {
+    const name =
+      String(customer.name || "")
+        .trim();
+
+    const phone =
+      String(customer.phone || "")
+        .replace(/\s+/g, "")
+        .trim();
+
+    const address =
+      String(customer.address || "")
+        .trim();
+
+    const pincode =
+      String(customer.pincode || "")
+        .trim();
+
+    const instructions =
+      String(
+        customer.instructions || ""
+      ).trim();
+
+    if (instructions.length > 500) {
+
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Instructions too long"
+      },
+      {
+        status: 400
+      }
+    );
+
+    }
+
+    /* =========================
+       NAME VALIDATION
+    ========================= */
+
+    if (name.length < 2) {
 
       return Response.json(
         {
@@ -63,9 +102,7 @@ export async function onRequestPost(context) {
       /^(?:\+91|91)?[6-9]\d{9}$/;
 
     if (
-      !phoneRegex.test(
-        customer.phone
-      )
+      !phoneRegex.test(phone)
     ) {
 
       return Response.json(
@@ -73,6 +110,25 @@ export async function onRequestPost(context) {
           success: false,
           message:
             "Invalid phone number"
+        },
+        {
+          status: 400
+        }
+      );
+
+    }
+
+    /* =========================
+       ADDRESS VALIDATION
+    ========================= */
+
+    if (address.length < 10) {
+
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Invalid address"
         },
         {
           status: 400
@@ -94,7 +150,7 @@ export async function onRequestPost(context) {
 
     if (
       !allowedPincodes.includes(
-        customer.pincode
+        pincode
       )
     ) {
 
@@ -120,15 +176,42 @@ export async function onRequestPost(context) {
     for (const item of items) {
 
       if (
-        !item.price ||
-        !item.quantity
+        !item ||
+        typeof item !== "object"
       ) {
 
         return Response.json(
           {
             success: false,
             message:
-              "Malformed cart"
+              "Malformed cart item"
+          },
+          {
+            status: 400
+          }
+        );
+
+      }
+
+      const quantity =
+        Number(item.quantity);
+
+      const price =
+        Number(item.price);
+
+      if (
+        !item.name ||
+        Number.isNaN(quantity) ||
+        Number.isNaN(price) ||
+        quantity <= 0 ||
+        price <= 0
+      ) {
+
+        return Response.json(
+          {
+            success: false,
+            message:
+              "Invalid cart data"
           },
           {
             status: 400
@@ -138,8 +221,7 @@ export async function onRequestPost(context) {
       }
 
       subtotal +=
-        item.price *
-        item.quantity;
+        price * quantity;
 
     }
 
@@ -148,32 +230,105 @@ export async function onRequestPost(context) {
     const total =
       subtotal + deliveryFee;
 
+
+/* =========================
+   BUSINESS HOURS
+========================= */
+
+const now =
+  new Date();
+
+const currentHour =
+  now.getHours();
+
+const currentDay =
+  now.getDay();
+
+/*
+  0 = Sunday
+*/
+
+const isWeekend =
+  currentDay === 0;
+
+const openingHour = 10;
+const closingHour = 21;
+
+let businessStatus =
+  "OPEN";
+
+/* =========================
+   CLOSED DAY
+========================= */
+
+if (isWeekend) {
+
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Bakery is closed today"
+    },
+    {
+      status: 403
+    }
+  );
+
+}
+
+/* =========================
+   PRE-ORDER HOURS
+========================= */
+
+if (
+  currentHour < openingHour ||
+  currentHour >= closingHour
+) {
+
+  businessStatus =
+    "PREORDER";
+
+}
+
     /* =========================
        TELEGRAM MESSAGE
     ========================= */
 
-    let message =
-`🍰 NEW ORDER
+const orderLabel =
+  businessStatus === "PREORDER"
+    ? "📦 PRE-ORDER"
+    : "🍰 NEW ORDER";
 
-👤 ${customer.name}
+let telegramMessage =
+`${orderLabel}
 
-📞 ${customer.phone}
+👤 Customer:
+${name}
 
-📍 ${customer.address}
+📞 Phone:
+${phone}
 
-━━━━━━━━━━`;
+📍 Address:
+${address}
+
+📮 Pincode:
+${pincode}
+
+━━━━━━━━━━
+ORDER ITEMS`;
+
 
     items.forEach(item => {
 
-      message += `
+      telegramMessage += `
 
 • ${item.name}
-x${item.quantity}
-₹${item.price * item.quantity}`;
+Qty: ${item.quantity}
+Amount: ₹${item.price * item.quantity}`;
 
     });
 
-    message += `
+    telegramMessage += `
 
 ━━━━━━━━━━
 
@@ -183,38 +338,91 @@ Delivery: ₹${deliveryFee}
 
 Total: ₹${total}`;
 
+    if (instructions) {
+
+      telegramMessage += `
+
+━━━━━━━━━━
+
+📝 Instructions:
+${instructions}`;
+
+    }
+
     /* =========================
-       TELEGRAM API
+       ENV VARIABLES
     ========================= */
 
     const telegramToken =
       context.env
         .TELEGRAM_BOT_TOKEN;
 
-    const chatId =
+    const chatIdsRaw =
       context.env
-        .TELEGRAM_CHAT_ID;
+        .TELEGRAM_CHAT_IDS;
+
+    if (
+      !telegramToken ||
+      !chatIdsRaw
+    ) {
+
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Missing server configuration"
+        },
+        {
+          status: 500
+        }
+      );
+
+    }
+
+    const chatIds =
+      chatIdsRaw
+        .split(",");
+
+    /* =========================
+       TELEGRAM API
+    ========================= */
 
     const telegramURL =
 `https://api.telegram.org/bot${telegramToken}/sendMessage`;
 
-    await fetch(
-      telegramURL,
-      {
-        method: "POST",
+    for (const chatId of chatIds) {
 
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
+      const response =
+        await fetch(
+          telegramURL,
+          {
+            method: "POST",
 
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message
-        })
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+              chat_id:
+                chatId.trim(),
+
+              text:
+                telegramMessage
+            })
+
+          }
+        );
+
+      if (!response.ok) {
+
+        console.error(
+          "Telegram send failed"
+        );
 
       }
-    );
+
+    }
 
     /* =========================
        SUCCESS
@@ -228,11 +436,13 @@ Total: ₹${total}`;
 
   } catch (error) {
 
+    console.error(error);
+
     return Response.json(
       {
         success: false,
         message:
-          "Server error"
+          "Internal server error"
       },
       {
         status: 500

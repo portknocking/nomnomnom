@@ -668,7 +668,7 @@ function setupCheckoutForm() {
 
   if (!form) return;
 
-  form.onsubmit = e => {
+  form.onsubmit = async e => {
 
     e.preventDefault();
 
@@ -705,6 +705,9 @@ function setupCheckoutForm() {
 
     const addressInput =
       textareas[0];
+
+    const instructions = 
+      textareas[1].value.trim();
 
     const pincodeInput =
       document.querySelector(
@@ -846,7 +849,8 @@ function setupCheckoutForm() {
         name,
         phone,
         address,
-        pincode
+        pincode,
+        instructions
       },
 
       items: cart,
@@ -866,35 +870,78 @@ function setupCheckoutForm() {
       orderData
     );
 
-    /* =========================
-       TELEGRAM API PLACEHOLDER
-    ========================= */
+/* =========================
+   SEND ORDER TO BACKEND
+========================= */
+  
+try {
 
-    setTimeout(() => {
-
-      localStorage.removeItem(
-        CART_KEY
-      );
-
-      renderCart();
-
-      form.reset();
-
-      if (deliveryMessage) {
-        deliveryMessage.textContent = "";
+  const response =
+    await fetch(
+      "/api/order",
+      {
+        method: "POST",
+      
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+      
+        body: JSON.stringify(
+          orderData
+        )
       }
+    );
+  
+  const data =
+    await response.json();
+  
+  if (!response.ok) {
+  
+    throw new Error(
+      data.message ||
+      "Order failed"
+    );
+  
+  }
 
-      button.disabled = false;
+  /* =========================
+     SUCCESS
+  ========================= */
 
-      button.textContent =
-        "Place Order";
+  localStorage.removeItem(
+    CART_KEY
+  );
 
-      showToast(
-        "Order placed successfully"
-      );
+  renderCart();
 
-    }, 1800);
+  form.reset();
 
+  if (deliveryMessage) {
+    deliveryMessage.textContent = "";
+  }
+
+  showToast(
+    "Order placed successfully"
+  );
+
+} catch (error) {
+
+  console.error(error);
+
+  showToast(
+    error.message ||
+    "Something went wrong"
+  );
+
+} finally {
+
+  button.disabled = false;
+
+  button.textContent =
+    "Place Order";
+
+}
   };
 
 }
