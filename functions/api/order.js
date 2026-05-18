@@ -375,69 +375,89 @@ export async function onRequestPost(context) {
     const total =
       subtotal + deliveryFee;
 
-    /* =========================
-       BUSINESS HOURS
-    ========================= */
+/* =========================
+   INDIA TIME
+========================= */
 
-    const indiaNow =
-      new Date(
-        new Date().toLocaleString(
-          "en-US",
-          {
-            timeZone:
-              "Asia/Kolkata"
-          }
-        )
-      );
+const indiaFormatter =
+  new Intl.DateTimeFormat(
+    "en-IN",
+    {
+      timeZone:
+        "Asia/Kolkata",
 
-    const currentHour =
-      indiaNow.getHours();
+      hour12: true,
 
-    const currentDay =
-      indiaNow.getDay();
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
 
-    const indiaTimeString =
-      indiaNow.toLocaleString(
-        "en-IN",
-        {
-          timeZone:
-            "Asia/Kolkata"
-        }
-      );
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
 
-    const isWeekend =
-      currentDay === 0;
-
-    const openingHour = 10;
-    const closingHour = 21;
-
-    let businessStatus =
-      "OPEN";
-
-    if (isWeekend) {
-
-      return Response.json(
-        {
-          success: false,
-          message:
-            "Bakery closed today"
-        },
-        {
-          status: 403
-        }
-      );
-
+      weekday: "long"
     }
+  );
 
-    if (
-      currentHour < openingHour ||
-      currentHour >= closingHour
-    ) {
+const indiaParts =
+  indiaFormatter.formatToParts(
+    new Date()
+  );
 
-      businessStatus =
-        "PREORDER";
+const getPart = type =>
+  indiaParts.find(
+    part => part.type === type
+  )?.value || "";
 
+const currentHour =
+  Number(getPart("hour"));
+
+const currentDayName =
+  getPart("weekday");
+
+const indiaTimeString =
+  indiaFormatter.format(
+    new Date()
+  );
+
+/* =========================
+   BUSINESS STATUS
+========================= */
+
+const isWeekend =
+  currentDayName === "Sunday";
+
+const openingHour = 10;
+const closingHour = 21;
+
+let businessStatus =
+  "OPEN";
+
+if (isWeekend) {
+
+  return Response.json(
+    {
+      success: false,
+      message:
+        "Bakery closed today"
+    },
+    {
+      status: 403
     }
+  );
+
+}
+
+if (
+  currentHour < openingHour ||
+  currentHour >= closingHour
+) {
+
+  businessStatus =
+    "PREORDER";
+
+}
 
     /* =========================
        RATE LIMITING
