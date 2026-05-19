@@ -636,7 +636,7 @@ function setupPincodeChecker() {
     if (allowed.includes(value)) {
 
       message.textContent =
-        "Delivery available";
+        "Delivery available in your area!";
 
       message.style.color =
         "#2f7a3f";
