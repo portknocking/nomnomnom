@@ -1176,3 +1176,721 @@ textarea { resize: vertical; min-height: 100px; }
     transition-duration: .01ms !important;
   }
 }
+/* =========================
+   CUSTOM CAKE NAV BUTTON
+========================= */
+
+.custom-cake-nav-btn {
+
+  position: relative;
+
+  padding:
+    0.85rem 1.4rem;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffb3d1,
+      #ff6fa5
+    );
+
+  color: white;
+
+  font-weight: 600;
+
+  letter-spacing: 0.03em;
+
+  text-decoration: none;
+
+  box-shadow:
+    0 0 12px rgba(255, 111, 165, 0.55),
+    0 0 28px rgba(255, 179, 209, 0.35);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    opacity 0.25s ease;
+
+  overflow: hidden;
+
+}
+
+/* =========================
+   SHIMMER EFFECT
+========================= */
+
+.custom-cake-nav-btn::before {
+
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: -120%;
+
+  width: 80%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      120deg,
+      transparent,
+      rgba(255,255,255,0.7),
+      transparent
+    );
+
+  transform: skewX(-20deg);
+
+  animation:
+    shimmer 3s infinite;
+
+}
+
+/* =========================
+   HOVER
+========================= */
+
+.custom-cake-nav-btn:hover {
+
+  transform:
+    translateY(-2px)
+    scale(1.03);
+
+  box-shadow:
+    0 0 18px rgba(255, 111, 165, 0.75),
+    0 0 42px rgba(255, 179, 209, 0.45);
+
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes shimmer {
+
+  0% {
+    left: -120%;
+  }
+
+  100% {
+    left: 150%;
+  }
+
+}
+
+/* =========================================
+   CUSTOM CAKE PAGE
+========================================= */
+
+.custom-cake-link {
+
+  position: relative;
+
+  padding: 0.75rem 1.3rem;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ff4f8b,
+      #ff7ca8
+    );
+
+  color: #fff !important;
+
+  font-weight: 600;
+
+  box-shadow:
+    0 0 14px rgba(255,79,139,0.45),
+    0 0 34px rgba(255,79,139,0.18);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+
+}
+
+.custom-cake-link:hover {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 0 18px rgba(255,79,139,0.65),
+    0 0 42px rgba(255,79,139,0.28);
+
+}
+
+/* =========================================
+   HERO
+========================================= */
+
+.custom-cake-hero {
+
+  position: relative;
+
+  overflow: hidden;
+
+  padding:
+    5rem 1.2rem 4rem;
+
+  text-align: center;
+
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(255,114,160,0.18),
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      #fff5f8,
+      #ffffff
+    );
+
+}
+
+.custom-cake-hero::before {
+
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255,114,160,0.12),
+      transparent 25%
+    );
+
+  pointer-events: none;
+
+}
+
+.custom-cake-hero .eyebrow {
+
+  display: inline-block;
+
+  margin-bottom: 1rem;
+
+  color: #ff4f8b;
+
+  font-size: 0.9rem;
+
+  font-weight: 700;
+
+  letter-spacing: 0.18em;
+
+  text-transform: uppercase;
+
+}
+
+.custom-cake-hero h1 {
+
+  font-size: clamp(2.7rem, 7vw, 5.5rem);
+
+  line-height: 0.95;
+
+  color: #111;
+
+  margin-bottom: 1.4rem;
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+}
+
+.hero-description {
+
+  max-width: 720px;
+
+  margin: auto;
+
+  font-size: 1.05rem;
+
+  line-height: 1.9;
+
+  color: #5e5e5e;
+
+}
+
+/* =========================================
+   SECTION
+========================================= */
+
+.custom-cake-section {
+
+  padding:
+    0 1rem 5rem;
+
+  margin-top: -1rem;
+
+}
+
+/* =========================================
+   CARD
+========================================= */
+
+.custom-cake-card {
+
+  max-width: 900px;
+
+  margin: auto;
+
+  background: #ffffff;
+
+  border-radius: 30px;
+
+  padding: 2.6rem;
+
+  box-shadow:
+    0 18px 60px rgba(0,0,0,0.08);
+
+  border:
+    1px solid rgba(0,0,0,0.04);
+
+}
+
+/* =========================================
+   FORM
+========================================= */
+
+.custom-cake-form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 1.8rem;
+
+}
+
+.form-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(240px, 1fr));
+
+  gap: 1.4rem;
+
+}
+
+.form-group {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 0.7rem;
+
+}
+
+.form-group label {
+
+  font-weight: 600;
+
+  color: #1c1c1c;
+
+  font-size: 0.95rem;
+
+}
+
+.form-group input,
+.form-group textarea {
+
+  width: 100%;
+
+  border:
+    1px solid #eadde2;
+
+  background: #fff9fb;
+
+  border-radius: 18px;
+
+  padding:
+    1rem 1.1rem;
+
+  font-size: 1rem;
+
+  outline: none;
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
+
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+
+  border-color: #ff5f95;
+
+  box-shadow:
+    0 0 0 4px rgba(255,95,149,0.15);
+
+  transform: translateY(-1px);
+
+}
+
+.form-group textarea {
+
+  resize: vertical;
+
+  min-height: 140px;
+
+}
+
+/* =========================================
+   FILE UPLOAD
+========================================= */
+
+.upload-box {
+
+  position: relative;
+
+  border:
+    2px dashed #ff8ab4;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fff7fa,
+      #fffdfd
+    );
+
+  border-radius: 24px;
+
+  padding: 2.2rem;
+
+  text-align: center;
+
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease;
+
+}
+
+.upload-box:hover {
+
+  border-color: #ff4f8b;
+
+  transform: translateY(-2px);
+
+}
+
+.upload-box input {
+
+  width: 100%;
+
+  border: none;
+
+  background: transparent;
+
+  padding: 0;
+
+  cursor: pointer;
+
+}
+
+/* =========================================
+   IMAGE PREVIEW
+========================================= */
+
+.image-preview-wrapper {
+
+  display: flex;
+
+  justify-content: center;
+
+}
+
+.image-preview-wrapper img {
+
+  width: 100%;
+
+  max-width: 420px;
+
+  border-radius: 24px;
+
+  object-fit: cover;
+
+  box-shadow:
+    0 10px 28px rgba(0,0,0,0.12);
+
+}
+
+/* =========================================
+   BUTTON
+========================================= */
+
+.submit-custom-btn {
+
+  border: none;
+
+  border-radius: 18px;
+
+  padding:
+    1.2rem 1.5rem;
+
+  background:
+    linear-gradient(
+      135deg,
+      #111,
+      #292929
+    );
+
+  color: #fff;
+
+  font-size: 1rem;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease,
+    box-shadow 0.25s ease;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.18);
+
+}
+
+.submit-custom-btn:hover {
+
+  transform: translateY(-2px);
+
+  opacity: 0.96;
+
+  box-shadow:
+    0 16px 38px rgba(0,0,0,0.22);
+
+}
+
+/* =========================================
+   UTILITIES
+========================================= */
+
+.hidden {
+
+  display: none;
+
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .custom-cake-hero {
+
+    padding:
+      4rem 1rem 3rem;
+
+  }
+
+  .custom-cake-hero h1 {
+
+    font-size: 3rem;
+
+    line-height: 1;
+
+  }
+
+  .hero-description {
+
+    font-size: 0.97rem;
+
+    line-height: 1.7;
+
+  }
+
+  .custom-cake-section {
+
+    padding:
+      0 0.8rem 4rem;
+
+  }
+
+  .custom-cake-card {
+
+    padding:
+      1.5rem;
+
+    border-radius: 24px;
+
+  }
+
+  .upload-box {
+
+    padding: 1.6rem;
+
+  }
+
+  .submit-custom-btn {
+
+    width: 100%;
+
+  }
+
+  .nav-links {
+
+    gap: 0.6rem;
+
+    flex-wrap: wrap;
+
+    justify-content: center;
+
+  }
+
+}
+
+/* =========================
+   FLOATING CUSTOM CAKE BTN
+========================= */
+
+.floating-cake-btn {
+
+  position: fixed;
+
+  right: 18px;
+  bottom: 20px;
+
+  z-index: 9999;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.7rem;
+
+  padding:
+    0.95rem 1.15rem;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ff5f95,
+      #ff86b1
+    );
+
+  color: #fff;
+
+  font-weight: 700;
+
+  font-size: 0.92rem;
+
+  box-shadow:
+    0 10px 28px rgba(255,95,149,0.35),
+    0 0 28px rgba(255,95,149,0.22);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    opacity 0.25s ease;
+
+  animation:
+    floatingGlow 2.8s infinite;
+
+  backdrop-filter: blur(10px);
+
+}
+
+.floating-cake-btn:hover {
+
+  transform:
+    translateY(-3px)
+    scale(1.03);
+
+  box-shadow:
+    0 16px 40px rgba(255,95,149,0.42),
+    0 0 38px rgba(255,95,149,0.28);
+
+}
+
+.floating-cake-btn span {
+
+  white-space: nowrap;
+
+}
+
+/* =========================
+   FLOAT ANIMATION
+========================= */
+
+@keyframes floatingGlow {
+
+  0%,100% {
+
+    transform:
+      translateY(0);
+
+  }
+
+  50% {
+
+    transform:
+      translateY(-4px);
+
+  }
+
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+  .floating-cake-btn {
+
+    right: 14px;
+    bottom: 16px;
+
+    padding:
+      0.9rem 1rem;
+
+    font-size: 0.85rem;
+
+  }
+
+}
+
+/* =========================
+   EXTRA SMALL PHONES
+========================= */
+
+@media (max-width: 420px) {
+
+  .floating-cake-btn {
+
+    right: 12px;
+    bottom: 14px;
+
+    padding:
+      0.82rem 1rem;
+
+    font-size: 0.76rem;
+
+    gap: 0.45rem;
+
+  }
+
+  .floating-cake-btn span {
+
+    display: inline;
+
+  }
+
+}

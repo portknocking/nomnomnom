@@ -375,89 +375,106 @@ export async function onRequestPost(context) {
     const total =
       subtotal + deliveryFee;
 
-/* =========================
-   INDIA TIME
-========================= */
+    /* =========================
+       INDIA TIME
+    ========================= */
 
-const indiaFormatter =
-  new Intl.DateTimeFormat(
-    "en-IN",
-    {
-      timeZone:
-        "Asia/Kolkata",
+    // Formatter for the human-readable Telegram alert string (12-hour layout)
+    const indiaFormatter =
+      new Intl.DateTimeFormat(
+        "en-IN",
+        {
+          timeZone:
+            "Asia/Kolkata",
 
-      hour12: true,
+          hour12: true,
 
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
 
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
 
-      weekday: "long"
+          weekday: "long"
+        }
+      );
+
+    // Dedicated formatter utilizing a 24-hour cycle for reliable logic tracking
+    const logicFormatter =
+      new Intl.DateTimeFormat(
+        "en-IN",
+        {
+          timeZone:
+            "Asia/Kolkata",
+
+          hourCycle: "h23",
+
+          weekday: "long",
+          hour: "2-digit"
+        }
+      );
+
+    const indiaParts =
+      logicFormatter.formatToParts(
+        new Date()
+      );
+
+    const getPart = type =>
+      indiaParts.find(
+        part => part.type === type
+      )?.value || "";
+
+    // This correctly parses a 24-hour integer value (0-23)
+    const currentHour =
+      Number(getPart("hour"));
+
+    const currentDayName =
+      getPart("weekday");
+
+    const indiaTimeString =
+      indiaFormatter.format(
+        new Date()
+      );
+
+    /* =========================
+       BUSINESS STATUS
+    ========================= */
+
+    const isWeekend =
+      currentDayName === "Sunday";
+
+    const openingHour = 10;
+    const closingHour = 21;
+
+    let businessStatus =
+      "OPEN";
+
+    if (isWeekend) {
+
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Bakery closed today"
+        },
+        {
+          status: 403
+        }
+      );
+
     }
-  );
 
-const indiaParts =
-  indiaFormatter.formatToParts(
-    new Date()
-  );
+    if (
+      currentHour < openingHour ||
+      currentHour >= closingHour
+    ) {
 
-const getPart = type =>
-  indiaParts.find(
-    part => part.type === type
-  )?.value || "";
+      businessStatus =
+        "PREORDER";
 
-const currentHour =
-  Number(getPart("hour"));
-
-const currentDayName =
-  getPart("weekday");
-
-const indiaTimeString =
-  indiaFormatter.format(
-    new Date()
-  );
-
-/* =========================
-   BUSINESS STATUS
-========================= */
-
-const isWeekend =
-  currentDayName === "Sunday";
-
-const openingHour = 10;
-const closingHour = 21;
-
-let businessStatus =
-  "OPEN";
-
-if (isWeekend) {
-
-  return Response.json(
-    {
-      success: false,
-      message:
-        "Bakery closed today"
-    },
-    {
-      status: 403
     }
-  );
-
-}
-
-if (
-  currentHour < openingHour ||
-  currentHour >= closingHour
-) {
-
-  businessStatus =
-    "PREORDER";
-
-}
 
     /* =========================
        RATE LIMITING

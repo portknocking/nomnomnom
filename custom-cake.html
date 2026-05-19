@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Custom Cake | Veloura Bakery</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       VELOURA PREMIUM CUSTOM CAKE LAYOUT (MOBILE-FIRST)
+       ========================================================================== */
+    
+    body {
+      background-color: var(--cream);
+      overflow-x: hidden;
+    }
+
+    /* Interactive Background Graphics */
+    .bg-grain-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(var(--line) 1px, transparent 0);
+      background-size: 24px 24px;
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Hero Layout Modernization */
+    .page-hero {
+      position: relative;
+      padding: 5rem 1.25rem 3rem;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .hero-center {
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--gold-deep);
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.75rem;
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+
+    .page-description {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      font-weight: 400;
+    }
+
+    /* Split Screen Showcase Section */
+    .custom-cake-section {
+      position: relative;
+      padding: 0 1.25rem 5rem;
+      z-index: 1;
+    }
+
+    .split-layout-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    /* Graphic/Visual Showcase Column */
+    .showcase-visuals-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .aesthetic-card {
+      background: var(--cream-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Updated Static Image Showcase Frame */
+    .abstract-cake-art-frame {
+      width: 100%;
+      height: 240px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .abstract-cake-art-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .process-steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-badge {
+      background: var(--gold);
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-text h4 {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 0.15rem;
+    }
+
+    .step-text p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Premium Form Architecture */
+    .form-container-box {
+      background: var(--cream-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 2rem 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="tel"],
+    .form-group textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--ink);
+      background-color: var(--cream-soft);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      outline: none;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--gold);
+      background-color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(201, 162, 76, 0.12);
+    }
+
+    /* Fluid Upload Dropzone UI */
+    .upload-box {
+      position: relative;
+      border: 2px dashed var(--muted);
+      border-radius: var(--radius-sm);
+      padding: 2.25rem 1rem;
+      text-align: center;
+      background-color: rgba(243, 233, 215, 0.2);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .upload-box:active,
+    .upload-box:focus-within {
+      border-color: var(--gold);
+      background-color: rgba(201, 162, 76, 0.05);
+    }
+
+    .upload-box input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .upload-svg-graphic {
+      width: 36px;
+      height: 36px;
+      fill: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .upload-box span {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .upload-box::after {
+      content: "Supports JPG, PNG, WEBP";
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Live Preview Node Wrapper */
+    .image-preview-wrapper {
+      margin-top: 1.25rem;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      max-height: 300px;
+      background-color: var(--cream-warm);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .image-preview-wrapper img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+
+    /* Tactile Mobile Form Submit Controller */
+    .submit-custom-btn {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      background: var(--chocolate);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 1.1rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+      display: inline-block;
+      text-align: center;
+      margin-top: 0.5rem;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .submit-custom-btn:active {
+      transform: scale(0.98);
+      background: var(--chocolate-dk);
+    }
+
+    .submit-custom-btn:disabled {
+      background: var(--muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE ADAPTABILITY TABLETS & DESKTOPS
+       ========================================================================== */
+    @media (min-width: 768px) {
+      .page-hero {
+        padding: 7rem 1.5rem 4rem;
+      }
+      .page-hero h1 {
+        font-size: 3.5rem;
+      }
+      .split-layout-grid {
+        grid-template-columns: 1fr 1.1fr;
+        gap: 3.5rem;
+        max-width: 1024px;
+        margin: 0 auto;
+      }
+      .form-container-box {
+        padding: 2.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-grain-overlay"></div>
+
+  <header class="navbar">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="logo">Veloura</a>
+      <nav class="nav-links">
+        <a href="menu.html">Menu</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="cart.html" class="cart-btn">Cart</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container hero-center">
+      <p class="eyebrow">Bespoke Confectionery</p>
+      <h1>Design Your Custom Cake</h1>
+      <p class="page-description">
+        Transform your specific celebrations into memories. Provide design preferences, shape layouts, and inspiration visuals to begin.
+      </p>
+    </div>
+  </section>
+
+  <section class="custom-cake-section">
+    <div class="container split-layout-grid">
+      
+      <div class="showcase-visuals-panel">
+        <div class="aesthetic-card">
+          <div class="abstract-cake-art-frame">
+            <img 
+              src="https://thedottedi.in/cdn/shop/files/9449C2CB-A9BE-44ED-A701-2983F61EAAE8.jpg" 
+              alt="Artisanal layered celebration cake" 
+              loading="lazy" 
+            />
+          </div>
+          
+          <div class="process-steps-list">
+            <div class="step-item">
+              <div class="step-badge">1</div>
+              <div class="step-text">
+                <h4>Share Your Vision</h4>
+                <p>Provide flavor requirements, event themes, and sizing specs down below.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-badge">2</div>
+              <div class="step-text">
+                <h4>Upload Visuals</h4>
+                <p>Attach sketches, theme reference sheets, or inspiration boards directly.</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-badge">3</div>
+              <div class="step-text">
+                <h4>Artisanal Execution</h4>
+                <p>Our pastry chefs review, contact you with dynamic pricing quotes, and plan baking timelines.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-container-box">
+        <form class="custom-cake-form">
+          
+          <div class="form-group">
+            <label for="cakeName">Your Name</label>
+            <input type="text" id="cakeName" name="name" placeholder="Enter your full name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="cakePhone">Phone Number</label>
+            <input type="tel" id="cakePhone" name="phone" placeholder="Enter 10-digit mobile number" required />
+          </div>
+
+          <div class="form-group">
+            <label for="cakeDetails">Design Details & Specifications</label>
+            <textarea rows="6" id="cakeDetails" name="details" placeholder="Describe context themes, color schemes, tiers, or flavor instructions..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="cakeImage">Upload Inspiration Image</label>
+            <div class="upload-box">
+              <svg class="upload-svg-graphic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+              </svg>
+              <span>Tap to choose an image file</span>
+              <input type="file" id="cakeImage" name="image" accept="image/*" required />
+            </div>
+          </div>
+
+          <div class="image-preview-wrapper hidden" id="previewWrapper">
+            <img id="previewImage" alt="Cake preview" />
+          </div>
+
+          <button type="submit" class="submit-custom-btn">
+            Submit Custom Cake Request
+          </button>
+
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <div>
+        <h3>Veloura Bakery</h3>
+        <p>Premium handcrafted desserts.</p>
+      </div>
+      <div class="footer-links">
+        <a href="menu.html">Menu</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/custom-cake.js"></script>
+</body>
+
+</html>
