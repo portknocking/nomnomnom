@@ -451,6 +451,18 @@ async function renderMenu(
 
     card.className = "menu-card";
 
+    // Build Premium Star Rating UI
+    const ratingVal = item.rating || 5;
+    const reviewsNum = item.reviews || 30;
+    let starsHtml = "";
+    for (let i = 0; i < 5; i++) {
+      if (i < ratingVal) {
+        starsHtml += `<span class="star-icon">★</span>`;
+      } else {
+        starsHtml += `<span class="star-icon" style="color: #E2D9DC;">★</span>`;
+      }
+    }
+
     card.innerHTML = `
       <div class="menu-image">
         <img
@@ -461,15 +473,13 @@ async function renderMenu(
       </div>
 
       <div class="menu-content">
+        <div class="product-stars">
+          ${starsHtml}
+          <span class="reviews-count">(${reviewsNum} reviews)</span>
+        </div>
 
         <div class="menu-top">
-
           <h3>${item.name}</h3>
-
-          <span class="price">
-            ${formatPrice(item.price)}
-          </span>
-
         </div>
 
         <p class="menu-description">
@@ -477,20 +487,11 @@ async function renderMenu(
         </p>
 
         <div class="menu-bottom">
-
-          <span class="availability ${
-            item.available
-              ? "in-stock"
-              : "low-stock"
-          }">
-
-            ${
-              item.available
-                ? "Available"
-                : "Unavailable"
-            }
-
-          </span>
+          <div>
+            <span class="price">
+              ${formatPrice(item.price)}
+            </span>
+          </div>
 
           <button
             class="add-cart-btn"
@@ -499,10 +500,10 @@ async function renderMenu(
             data-price="${item.price}"
             data-image="${item.image}"
             ${!item.available ? "disabled" : ""}
+            title="Add to Cart"
           >
-            Add to Cart
+            +
           </button>
-
         </div>
 
       </div>
@@ -966,12 +967,6 @@ function setupBusinessStatus() {
 
   const currentDay =
     now.getDay();
-
-  /*
-    DAYS:
-    0 = Sunday
-    6 = Saturday
-  */
 
   const isWeekend =
     currentDay === 0;

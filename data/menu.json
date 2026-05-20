@@ -6,7 +6,9 @@
     "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=1200&auto=format&fit=crop",
     "description": "Rich Belgian chocolate sponge layered with silky dark truffle ganache.",
     "category": "Cakes",
-    "available": true
+    "available": true,
+    "rating": 5,
+    "reviews": 38
   },
 
   {
@@ -16,7 +18,9 @@
     "image": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=1200&auto=format&fit=crop",
     "description": "Creamy baked cheesecake topped with slow-cooked blueberry compote.",
     "category": "Cheesecakes",
-    "available": true
+    "available": true,
+    "rating": 5,
+    "reviews": 40
   },
 
   {
@@ -26,7 +30,9 @@
     "image": "https://images.unsplash.com/photo-1607920591413-4ec007e70023?q=80&w=1200&auto=format&fit=crop",
     "description": "Fudgy chocolate brownies finished with roasted hazelnuts and sea salt.",
     "category": "Brownies",
-    "available": true
+    "available": true,
+    "rating": 5,
+    "reviews": 37
   },
 
   {
@@ -36,7 +42,9 @@
     "image": "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?q=80&w=1200&auto=format&fit=crop",
     "description": "Soft vanilla cupcakes with whipped cream frosting and Madagascar vanilla.",
     "category": "Cupcakes",
-    "available": true
+    "available": true,
+    "rating": 4,
+    "reviews": 24
   },
 
   {
@@ -46,7 +54,9 @@
     "image": "https://images.unsplash.com/photo-1551024601-bec78aea704b?q=80&w=1200&auto=format&fit=crop",
     "description": "Curated dessert assortment featuring brownies, mini cheesecakes, and pastries.",
     "category": "Dessert Boxes",
-    "available": true
+    "available": true,
+    "rating": 5,
+    "reviews": 56
   },
 
   {
@@ -56,6 +66,8 @@
     "image": "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?q=80&w=1200&auto=format&fit=crop",
     "description": "Moist caramel sponge layered with sea salt caramel buttercream.",
     "category": "Cakes",
-    "available": true
+    "available": true,
+    "rating": 5,
+    "reviews": 42
   }
 ]
